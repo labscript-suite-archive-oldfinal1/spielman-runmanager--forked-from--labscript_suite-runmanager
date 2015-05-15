@@ -68,6 +68,11 @@ class SimplePythonEditor(QsciScintilla):
         self.setLexer(lexer)
         self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, 1, 'Courier')
 
+        # Set python tabs
+        self.setTabIndents(True)
+        self.setTabWidth(4)
+        self.setIndentationsUseTabs(False)
+
         # Don't want to see the horizontal scrollbar at all
         # Use raw message to Scintilla here (all messages are documented
         # here: http://www.scintilla.org/ScintillaDoc.html)

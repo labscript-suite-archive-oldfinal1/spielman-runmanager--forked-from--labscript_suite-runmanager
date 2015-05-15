@@ -605,12 +605,12 @@ QToolButton:hover {
         <item row="0" column="0">
          <layout class="QGridLayout" name="gridLayout_2">
           <item row="0" column="2">
-           <widget class="QToolButton" name="toolButton_edit_labscript_file">
+           <widget class="QToolButton" name="toolButton_save_labscript_file">
             <property name="enabled">
              <bool>false</bool>
             </property>
             <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Edit this labscript file in a text editor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Save this labscript file to disk&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
             <property name="text">
              <string>...</string>
@@ -722,7 +722,7 @@ QToolButton:hover {
            </widget>
           </item>
           <item row="1" column="0" colspan="3">
-           <widget class="QTextBrowser" name="textBrowser"/>
+           <widget class="SimplePythonEditor" name="Qscintella_Text"/>
           </item>
          </layout>
         </item>
@@ -1179,6 +1179,11 @@ QToolButton:hover {
   <customwidget>
    <class>TreeView</class>
    <extends>QTreeView</extends>
+   <header>qtutils/widgets.h</header>
+  </customwidget>
+  <customwidget>
+   <class>SimplePythonEditor</class>
+   <extends>QPlainTextEdit</extends>
    <header>qtutils/widgets.h</header>
   </customwidget>
  </customwidgets>
