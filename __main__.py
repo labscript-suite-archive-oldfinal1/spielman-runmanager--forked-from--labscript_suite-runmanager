@@ -1228,8 +1228,8 @@ class RunManager(object):
         self.output_popout_button.setIcon(QtGui.QIcon(':/qtutils/fugue/arrow-out'))
         self.output_popout_button.setToolTip('Toggle whether the output box is in a separate window')
         self.ui.tabWidget.tabBar().setTabButton(output_tab_index, QtGui.QTabBar.RightSide, self.output_popout_button)
-        # Fix the first three tabs in place:
-        for index in range(3):
+        # Fix the first four tabs in place:
+        for index in range(4):
             self.ui.tabWidget.tabBar().setMovable(False, index=index)
         # Whether or not the output box is currently popped out:
         self.output_box_is_popped_out = False
