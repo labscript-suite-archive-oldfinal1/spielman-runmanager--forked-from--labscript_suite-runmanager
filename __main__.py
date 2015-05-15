@@ -26,6 +26,7 @@ import socket
 import ast
 import pprint
 
+
 # Evaluation of globals happens in a thread with the pylab module imported.
 # Although we don't care about plotting, importing pylab makes Qt calls. We
 # can't have that from a non main thread, so we'll just disable matplotlib's
@@ -63,6 +64,7 @@ from zmq import ZMQError
 from labscript_utils.labconfig import LabConfig, config_prefix
 from labscript_utils.setup_logging import setup_logging
 import labscript_utils.shared_drive as shared_drive
+from SimplePythonEditor import *
 import runmanager
 
 from qtutils import inmain, inmain_decorator, UiLoader, inthread, DisconnectContextManager
@@ -1215,6 +1217,7 @@ class RunManager(object):
         loader = UiLoader()
         loader.registerCustomWidget(FingerTabWidget)
         loader.registerCustomWidget(TreeView)
+        loader.registerCustomWidget(SimplePythonEditor)
         self.ui = loader.load('main.ui', RunmanagerMainWindow())
 
         self.output_box = OutputBox(self.ui.verticalLayout_output_tab)
@@ -1348,7 +1351,7 @@ class RunManager(object):
                                             ],
                                   }
         self.exp_config = LabConfig(config_path, required_config_params)
-
+    
     def setup_axes_tab(self):
         self.axes_model = QtGui.QStandardItemModel()
 
@@ -1626,6 +1629,9 @@ class RunManager(object):
         # file is selected:
         self.ui.toolButton_select_shot_output_folder.setEnabled(enabled)
         self.ui.lineEdit_labscript_file.setToolTip(text)
+        
+        # Tell editor to edit this file
+        self.ui.Qscintella_Text.setText(open(text).read())
 
     def on_shot_output_folder_text_changed(self, text):
         # Blank out the 'reset default output folder' button if the user is
