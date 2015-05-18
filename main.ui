@@ -261,124 +261,26 @@ subprocess</string>
           <enum>QLayout::SetDefaultConstraint</enum>
          </property>
          <item>
-          <layout class="QVBoxLayout" name="verticalLayout_3">
-           <item>
-            <widget class="QRadioButton" name="radioButton_compile">
-             <property name="toolTip">
-              <string>Compile shots for the currently described parameter space.</string>
-             </property>
-             <property name="text">
-              <string>Compile</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QRadioButton" name="radioButton_send_to_mise">
-             <property name="toolTip">
-              <string>Send a description of the parameter space to mise, which will compile shots itself.</string>
-             </property>
-             <property name="text">
-              <string>Send to mise</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
+          <widget class="QCheckBox" name="checkBox_run_shots">
+           <property name="toolTip">
+            <string>Send the shot files to BLACS after compilation</string>
+           </property>
+           <property name="text">
+            <string>Run shot(s)</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
          </item>
          <item>
-          <widget class="QStackedWidget" name="stackedWidget_compile_or_mise">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
+          <widget class="QCheckBox" name="checkBox_view_shots">
+           <property name="toolTip">
+            <string>Open the shot files in runviewer after compilation</string>
            </property>
-           <property name="currentIndex">
-            <number>0</number>
+           <property name="text">
+            <string>View shot(s)</string>
            </property>
-           <widget class="QWidget" name="stackedWidgetPage_compile">
-            <layout class="QFormLayout" name="formLayout">
-             <property name="fieldGrowthPolicy">
-              <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-             </property>
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item row="0" column="0">
-              <widget class="QCheckBox" name="checkBox_run_shots">
-               <property name="toolTip">
-                <string>Send the shot files to BLACS after compilation</string>
-               </property>
-               <property name="text">
-                <string>Run shot(s)</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QCheckBox" name="checkBox_view_shots">
-               <property name="toolTip">
-                <string>Open the shot files in runviewer after compilation</string>
-               </property>
-               <property name="text">
-                <string>View shot(s)</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-           <widget class="QWidget" name="stackedWidgetPage_send_to_mise">
-            <layout class="QFormLayout" name="formLayout_2">
-             <property name="leftMargin">
-              <number>0</number>
-             </property>
-             <property name="topMargin">
-              <number>0</number>
-             </property>
-             <property name="rightMargin">
-              <number>0</number>
-             </property>
-             <property name="bottomMargin">
-              <number>0</number>
-             </property>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_4">
-               <property name="text">
-                <string>mise hostname</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QLineEdit" name="lineEdit_mise_hostname">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The host computer running mise.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <property name="text">
-                <string>localhost</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
           </widget>
          </item>
         </layout>
@@ -621,7 +523,10 @@ QToolButton:hover {
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
+          <item row="1" column="0" colspan="3">
+           <widget class="SimplePythonEditor" name="Qscintella_Text"/>
+          </item>
+          <item row="0" column="0" colspan="2">
            <widget class="QFrame" name="frame">
             <property name="autoFillBackground">
              <bool>false</bool>
@@ -713,16 +618,6 @@ QToolButton:hover {
              </item>
             </layout>
            </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>labscript file</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0" colspan="3">
-           <widget class="SimplePythonEditor" name="Qscintella_Text"/>
           </item>
          </layout>
         </item>
@@ -896,7 +791,7 @@ QToolButton:hover {
              <x>0</x>
              <y>0</y>
              <width>942</width>
-             <height>530</height>
+             <height>553</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -1048,7 +943,7 @@ QToolButton:hover {
              <x>0</x>
              <y>0</y>
              <width>971</width>
-             <height>500</height>
+             <height>523</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -1192,10 +1087,6 @@ QToolButton:hover {
   <tabstop>pushButton_abort</tabstop>
   <tabstop>pushButton_restart_subprocess</tabstop>
   <tabstop>pushButton_shuffle</tabstop>
-  <tabstop>radioButton_compile</tabstop>
-  <tabstop>radioButton_send_to_mise</tabstop>
-  <tabstop>checkBox_run_shots</tabstop>
-  <tabstop>checkBox_view_shots</tabstop>
   <tabstop>lineEdit_labscript_file</tabstop>
   <tabstop>toolButton_select_labscript_file</tabstop>
   <tabstop>lineEdit_shot_output_folder</tabstop>
@@ -1212,7 +1103,6 @@ QToolButton:hover {
   <tabstop>pushButton_open_globals_file</tabstop>
   <tabstop>pushButton_new_globals_file</tabstop>
   <tabstop>pushButton_diff_globals_file</tabstop>
-  <tabstop>lineEdit_mise_hostname</tabstop>
   <tabstop>treeView_groups</tabstop>
   <tabstop>scrollArea_2</tabstop>
  </tabstops>
