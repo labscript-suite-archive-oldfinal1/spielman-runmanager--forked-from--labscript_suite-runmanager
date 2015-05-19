@@ -2217,7 +2217,7 @@ class RunManager(object):
         default_output_folder = os.path.join(self.experiment_shot_storage,
                                              current_labscript_basename, 
                                              current_day_folder_suffix,
-                                             "%03d"%current_sequence_index)
+                                             "%04d"%current_sequence_index)
         default_output_folder = os.path.normpath(default_output_folder)
         return default_output_folder
 
