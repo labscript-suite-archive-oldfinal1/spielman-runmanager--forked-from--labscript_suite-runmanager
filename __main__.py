@@ -1645,14 +1645,7 @@ class RunManager(object):
             except Exception as e:
                 raise Exception('Error parsing globals:\n%s\nCompilation aborted.' % str(e))
             logger.info('Making h5 files')
-            
-            # Add file names to the list widget
-            run_file_data = runmanager.make_run_file_data(
-                labscript_file, output_folder, sequenceglobals, shots, shuffle)
-            
-            for runfilename in run_file_data.keys():
-                self.ui.Queue_listWidget.addItem(runfilename)
-            
+                        
             labscript_file, run_files = self.make_h5_files(
                 labscript_file, output_folder, sequenceglobals, shots, shuffle)
             self.ui.pushButton_abort.setEnabled(True)
