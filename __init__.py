@@ -22,6 +22,8 @@ import types
 import threading
 import traceback
 
+from collections import OrderedDict
+
 import labscript_utils.h5_lock
 import h5py
 import numpy as np
@@ -495,6 +497,29 @@ def generate_sequence_id(scriptname):
     scriptbase = os.path.basename(scriptname).split('.py')[0]
     return timestamp + '_' + scriptbase
 
+def make_run_file_data(labscript_file, output_folder, sequence_globals, shots, shuffle=False):
+    """Does what it says. sequence_globals and shots are of the datatypes
+    returned by get_globals and get_shots, one is a nested dictionary with
+    string values, and the other a flat dictionary. sequence_id should
+    be some identifier unique to this sequence, use generate_sequence_id
+    to follow convention. shuffle will randomise the order that the run
+    files are generated in with respect to which element of shots they
+    come from.  The filenames the run files are
+    given is simply the sequence_id with increasing integers appended."""
+    nruns = len(shots)
+    ndigits = int(np.ceil(np.log10(nruns)))
+    sequence_id = generate_sequence_id(labscript_file)
+    basename = os.path.join(output_folder, sequence_id)
+
+    if shuffle:
+        random.shuffle(shots)
+        
+    d = OrderedDict()
+    
+    for i, shot_globals in enumerate(shots):
+        d[('%s_%0' + str(ndigits) + 'd.h5') % (basename, i)] = (i, shot_globals)
+    
+    return d
 
 def make_run_files(output_folder, sequence_globals, shots, sequence_id, shuffle=False):
     """Does what it says. sequence_globals and shots are of the datatypes
@@ -519,7 +544,6 @@ def make_run_files(output_folder, sequence_globals, shots, sequence_id, shuffle=
         runfilename = ('%s_%0' + str(ndigits) + 'd.h5') % (basename, i)
         make_single_run_file(runfilename, sequence_globals, shot_globals, sequence_id, i, nruns)
         yield runfilename
-
 
 def make_single_run_file(filename, sequenceglobals, runglobals, sequence_id, run_no, n_runs):
     """Does what it says. runglobals is a dict of this run's globals,
