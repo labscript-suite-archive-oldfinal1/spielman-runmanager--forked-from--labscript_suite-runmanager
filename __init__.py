@@ -490,38 +490,15 @@ def expand_globals(sequence_globals, evaled_globals):
     return shots
 
 
-def generate_sequence_id(scriptname):
+def generate_sequence_id(scriptname, sequence_id_format):
     """Our convention for generating sequence ids. Just a timestamp and
     the name of the labscript that the run file is to be compiled with."""
-    timestamp = time.strftime('%Y%m%dT%H%M%S', time.localtime())
+    
+    timestamp = time.strftime(sequence_id_format, time.localtime())
     scriptbase = os.path.basename(scriptname).split('.py')[0]
     return timestamp + '_' + scriptbase
 
-def make_run_file_data(labscript_file, output_folder, sequence_globals, shots, shuffle=False):
-    """Does what it says. sequence_globals and shots are of the datatypes
-    returned by get_globals and get_shots, one is a nested dictionary with
-    string values, and the other a flat dictionary. sequence_id should
-    be some identifier unique to this sequence, use generate_sequence_id
-    to follow convention. shuffle will randomise the order that the run
-    files are generated in with respect to which element of shots they
-    come from.  The filenames the run files are
-    given is simply the sequence_id with increasing integers appended."""
-    nruns = len(shots)
-    ndigits = int(np.ceil(np.log10(nruns)))
-    sequence_id = generate_sequence_id(labscript_file)
-    basename = os.path.join(output_folder, sequence_id)
-
-    if shuffle:
-        random.shuffle(shots)
-        
-    d = OrderedDict()
-    
-    for i, shot_globals in enumerate(shots):
-        d[('%s_%0' + str(ndigits) + 'd.h5') % (basename, i)] = (i, shot_globals)
-    
-    return d
-
-def make_run_files(output_folder, sequence_globals, shots, sequence_id, shuffle=False):
+def make_run_files(output_folder, sequence_globals, shots, sequence_id, notes, shuffle=False):
     """Does what it says. sequence_globals and shots are of the datatypes
     returned by get_globals and get_shots, one is a nested dictionary with
     string values, and the other a flat dictionary. sequence_id should
@@ -542,10 +519,10 @@ def make_run_files(output_folder, sequence_globals, shots, sequence_id, shuffle=
         random.shuffle(shots)
     for i, shot_globals in enumerate(shots):
         runfilename = ('%s_%0' + str(ndigits) + 'd.h5') % (basename, i)
-        make_single_run_file(runfilename, sequence_globals, shot_globals, sequence_id, i, nruns)
+        make_single_run_file(runfilename, sequence_globals, shot_globals, sequence_id, notes, i, nruns)
         yield runfilename
 
-def make_single_run_file(filename, sequenceglobals, runglobals, sequence_id, run_no, n_runs):
+def make_single_run_file(filename, sequenceglobals, runglobals, sequence_id, notes, run_no, n_runs):
     """Does what it says. runglobals is a dict of this run's globals,
     the format being the same as that of one element of the list returned
     by expand_globals.  sequence_globals is a nested dictionary of the
@@ -560,6 +537,7 @@ def make_single_run_file(filename, sequenceglobals, runglobals, sequence_id, run
         f.attrs['sequence_id'] = sequence_id
         f.attrs['run number'] = run_no
         f.attrs['n_runs'] = n_runs
+        f.attrs['notes'] = notes
         f.create_group('globals')
         if sequenceglobals is not None:
             for groupname, groupvars in sequenceglobals.items():
@@ -584,7 +562,7 @@ def make_single_run_file(filename, sequenceglobals, runglobals, sequence_id, run
                 raise ValueError(message)
 
 
-def make_run_file_from_globals_files(labscript_file, globals_files, output_path):
+def make_run_file_from_globals_files(labscript_file, globals_files, output_path, sequence_id_format):
     """Creates a run file output_path, using all the globals from
     globals_files. Uses labscript_file only to generate a sequence ID"""
     groups = get_all_groups(globals_files)
@@ -598,7 +576,7 @@ def make_run_file_from_globals_files(labscript_file, globals_files, output_path)
                 scanning_globals.append(global_name)
         raise ValueError('Cannot compile to a single run file: The following globals are a sequence: ' +
                          ' '.join(scanning_globals))
-    sequence_id = generate_sequence_id(labscript_file)
+    sequence_id = generate_sequence_id(labscript_file, sequence_id_format)
     make_single_run_file(output_path, sequence_globals, shots[0], sequence_id, 1, 1)
 
 

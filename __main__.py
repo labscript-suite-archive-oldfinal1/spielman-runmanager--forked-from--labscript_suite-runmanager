@@ -151,6 +151,15 @@ class KeyPressQApplication(QtGui.QApplication):
         return QtGui.QApplication.notify(self, object, event)
 
 
+class QPadSpinBox(QtGui.QSpinBox):
+    def __init__(self, *args):
+       QtGui.QSpinBox.__init__(self, *args)
+
+       self.setRange(0,9999)
+
+    def textFromValue(self, value):
+       return "%04d" % value
+
 class FingerTabBarWidget(QtGui.QTabBar):
 
     """A TabBar with the tabs on the left and the text horizontal. Credit to
@@ -1218,6 +1227,7 @@ class RunManager(object):
         loader.registerCustomWidget(FingerTabWidget)
         loader.registerCustomWidget(TreeView)
         loader.registerCustomWidget(SimplePythonEditor)
+        loader.registerCustomWidget(QPadSpinBox)
         self.ui = loader.load('main.ui', RunmanagerMainWindow())
 
         self.output_box = OutputBox(self.ui.verticalLayout_output_tab)
@@ -1265,6 +1275,15 @@ class RunManager(object):
             self.output_folder_format = self.output_folder_format.strip(os.path.sep)
         except (LabConfig.NoOptionError, LabConfig.NoSectionError):
             self.output_folder_format = os.path.join('%Y', '%m', '%d')
+        
+        # What the output generate_sequence_id should look like
+        try:
+            self.sequence_id_format = self.exp_config.get('runmanager', 'sequence_id_format')
+            # Better not contain slashes:
+            self.sequence_id_format =  self.sequence_id_format.replace(os.path.sep,"")
+        except (LabConfig.NoOptionError, LabConfig.NoSectionError):
+            self.sequence_id_format = '%Y%m%dT%H%M%S'
+            
         # Store the currently open groups as {(globals_filename, group_name): GroupTab}
         self.currently_open_groups = {}
 
@@ -1647,9 +1666,12 @@ class RunManager(object):
             logger.info('Making h5 files')
                         
             labscript_file, run_files = self.make_h5_files(
-                labscript_file, output_folder, sequenceglobals, shots, shuffle)
+                labscript_file, output_folder, sequenceglobals, shots, 
+                self.ui.plainTextEdit_SequenceNotes.toPlainText(),
+                shuffle)
             self.ui.pushButton_abort.setEnabled(True)
             self.compile_queue.put([labscript_file, run_files, send_to_BLACS, BLACS_host, send_to_runviewer])
+            self.ui.spinBox_SequenceIndex.setValue(self.ui.spinBox_SequenceIndex.value() + 1)
         except Exception as e:
             self.output_box.output('%s\n\n' % str(e), red=True)
         logger.info('end engage')
@@ -2187,11 +2209,15 @@ class RunManager(object):
         folder, does not check if it exists."""
         current_day_folder_suffix = time.strftime(self.output_folder_format)
         current_labscript_file = self.ui.lineEdit_labscript_file.text()
+        current_sequence_index = self.ui.spinBox_SequenceIndex.value()
+        
         if not current_labscript_file:
             return ''
         current_labscript_basename = os.path.splitext(os.path.basename(current_labscript_file))[0]
         default_output_folder = os.path.join(self.experiment_shot_storage,
-                                             current_labscript_basename, current_day_folder_suffix)
+                                             current_labscript_basename, 
+                                             current_day_folder_suffix,
+                                             "%03d"%current_sequence_index)
         default_output_folder = os.path.normpath(default_output_folder)
         return default_output_folder
 
@@ -2987,10 +3013,16 @@ class RunManager(object):
 
         return expansion_types_changed
 
-    def make_h5_files(self, labscript_file, output_folder, sequence_globals, shots, shuffle):
+    def make_h5_files(self, labscript_file, output_folder, sequence_globals, shots, notes, shuffle):
         mkdir_p(output_folder)  # ensure it exists
-        sequence_id = runmanager.generate_sequence_id(labscript_file)
-        run_files = runmanager.make_run_files(output_folder, sequence_globals, shots, sequence_id, shuffle)
+        
+        # Create notes text file
+        notes_file = os.path.join(output_folder, "notes.txt")
+        with open(notes_file, 'w') as f:
+            f.write(notes)
+        
+        sequence_id = runmanager.generate_sequence_id(labscript_file, self.sequence_id_format)
+        run_files = runmanager.make_run_files(output_folder, sequence_globals, shots, sequence_id, notes, shuffle)
         logger.debug(run_files)
         return labscript_file, run_files
 
