@@ -44,6 +44,7 @@ class BatchProcessor(object):
         try:
             with kill_lock:
                 labscript.labscript_init(run_file, labscript_file=labscript_file)
+                
                 execfile(labscript_file,sandbox,sandbox)
             return True
         except:
