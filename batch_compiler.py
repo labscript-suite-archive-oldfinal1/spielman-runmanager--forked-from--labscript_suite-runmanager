@@ -20,6 +20,7 @@ import labscript
 import labscript_utils.excepthook
 from labscript_utils.modulewatcher import ModuleWatcher
 
+
 class BatchProcessor(object):
     def __init__(self, to_parent, from_parent, kill_lock):
         self.to_parent = to_parent
@@ -43,6 +44,15 @@ class BatchProcessor(object):
         sandbox = {'__name__':'__main__'}
         try:
             with kill_lock:
+                # TODO: remove actual compilation of labscript from here and
+                # move to when file is ready to go at blacs.  This code should do
+                #
+                # labscript.labscript_init(run_file, labscript_file=labscript_file)
+                # with h5py.File(run_file) as h5_file:
+                #    labscript.save_labscripts(h5_file)
+                # 
+                # instead of the following code
+                # 
                 labscript.labscript_init(run_file, labscript_file=labscript_file)
                 
                 execfile(labscript_file,sandbox,sandbox)
