@@ -151,9 +151,16 @@ def delete_group(filename, groupname):
         del f['globals'][groupname]
 
 
-def get_globalslist(filename, groupname):
+def get_globalslist(filename, groupname=None):
+    """
+    Get a dictionary of the globals.  if groupname is None we will get all the
+    globals
+    """
     with h5py.File(filename, 'r') as f:
-        group = f['globals'][groupname]
+        if groupname is None:
+            group = f['globals']
+        else:
+            group = f['globals'][groupname]
         # File closes after this function call, so have to convert
         # the attrs to a dict before its file gets dereferenced:
         return dict(group.attrs)
