@@ -529,8 +529,8 @@ def make_run_files(output_folder, sequence_globals, shots, sequence_id, notes, s
         make_single_run_file(runfilename, sequence_globals, shot_globals, sequence_id, notes, i, nruns)
         yield runfilename
 
-def make_single_run_file(filename, sequenceglobals, runglobals, sequence_id, notes, run_no, n_runs):
-    """Does what it says. runglobals is a dict of this run's globals,
+def make_single_run_file(filename, sequenceglobals, shot_globals, sequence_id, notes, run_no, n_runs):
+    """Does what it says. shot_globals is a dict of this run's globals,
     the format being the same as that of one element of the list returned
     by expand_globals.  sequence_globals is a nested dictionary of the
     type returned by get_globals. Every run file needs a sequence ID,
@@ -540,33 +540,22 @@ def make_single_run_file(filename, sequenceglobals, runglobals, sequence_id, not
     must be provided, if this run file is part of a sequence, then they
     should reflect how many run files are being generated which share
     this sequence_id."""
-    with h5py.File(filename, 'w') as f:
-        f.attrs['sequence_id'] = sequence_id
-        f.attrs['run number'] = run_no
-        f.attrs['n_runs'] = n_runs
-        f.attrs['notes'] = notes
-        f.create_group('globals')
+    with h5py.File(filename, 'w') as h5file:
+        h5file.attrs['sequence_id'] = sequence_id
+        h5file.attrs['run number'] = run_no
+        h5file.attrs['n_runs'] = n_runs
+        h5file.attrs['notes'] = notes
+        h5file.create_group('globals')
         if sequenceglobals is not None:
             for groupname, groupvars in sequenceglobals.items():
-                group = f['globals'].create_group(groupname)
+                group = h5file['globals'].create_group(groupname)
                 unitsgroup = group.create_group('units')
                 expansiongroup = group.create_group('expansion')
                 for name, (value, units, expansion) in groupvars.items():
                     group.attrs[name] = value
                     unitsgroup.attrs[name] = units
                     expansiongroup.attrs[name] = expansion
-        for name, value in runglobals.items():
-            if value is None:
-                # Store it as a null object reference:
-                value = h5py.Reference()
-            try:
-                f['globals'].attrs[name] = value
-            except Exception as e:
-                message = ('Global %s cannot be saved as an hdf5 attribute. ' % name +
-                           'Globals can only have relatively simple datatypes, with no nested structures. ' +
-                           'Original error was:\n' +
-                           '%s: %s' % (e.__class__.__name__, e.message))
-                raise ValueError(message)
+        set_shot_globals(h5file, shot_globals)
 
 
 def make_run_file_from_globals_files(labscript_file, globals_files, output_path, sequence_id_format):
@@ -695,6 +684,24 @@ def get_shot_globals(filepath):
                 value = str(value)
             params[name] = value
     return params
+
+def set_shot_globals(h5file, shot_globals):
+    """
+    Writes the shot globals into an already open h5 file
+    """
+    for name, value in shot_globals.items():
+        if value is None:
+            # Store it as a null object reference:
+            value = h5py.Reference()
+        try:
+            h5file['globals'].attrs[name] = value
+        except Exception as e:
+            message = ('Global %s cannot be saved as an hdf5 attribute. ' % name +
+                       'Globals can only have relatively simple datatypes, with no nested structures. ' +
+                       'Original error was:\n' +
+                       '%s: %s' % (e.__class__.__name__, e.message))
+            raise ValueError(message)
+
 
 
 def dict_diff(dict1, dict2):
