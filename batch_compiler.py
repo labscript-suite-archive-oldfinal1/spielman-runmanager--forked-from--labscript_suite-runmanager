@@ -32,40 +32,14 @@ class BatchProcessor(object):
         while True:
             signal, data =  self.from_parent.get()
             if signal == 'compile':
-                success = self.compile(*data)
+                with kill_lock:
+                    success = labscript.compile(*data)
                 self.to_parent.put(['done',success])
             elif signal == 'quit':
                 sys.exit(0)
             else:
                 raise ValueError(signal)
-                    
-    def compile(self,labscript_file, run_file):
-        # The namespace the labscript will run in:
-        sandbox = {'__name__':'__main__'}
-        try:
-            with kill_lock:
-                # TODO: remove actual compilation of labscript from here and
-                # move to when file is ready to go at blacs.  This code should do
-                #
-                # labscript.labscript_init(run_file, labscript_file=labscript_file)
-                # with h5py.File(run_file) as h5_file:
-                #    labscript.save_labscripts(h5_file)
-                # 
-                # instead of the following code
-                # 
-                labscript.labscript_init(run_file, labscript_file=labscript_file)
-                
-                execfile(labscript_file,sandbox,sandbox)
-            return True
-        except:
-            traceback_lines = traceback.format_exception(*sys.exc_info())
-            del traceback_lines[1:2]
-            message = ''.join(traceback_lines)
-            sys.stderr.write(message)
-            return False
-        finally:
-            labscript.labscript_cleanup()
-                   
+                       
 if __name__ == '__main__':
     module_watcher = ModuleWatcher() # Make sure modified modules are reloaded
     batch_processor = BatchProcessor(to_parent,from_parent,kill_lock)
