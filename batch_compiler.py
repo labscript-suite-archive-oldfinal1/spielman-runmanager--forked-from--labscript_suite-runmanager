@@ -33,6 +33,15 @@ class BatchProcessor(object):
             signal, data =  self.from_parent.get()
             if signal == 'compile':
                 with kill_lock:
+                    # TODO: remove actual compilation of labscript from here and
+                    # move to when file is ready to go at blacs.  This code should do
+                    #
+                    # labscript.labscript_init(run_file, labscript_file=labscript_file)
+                    # with h5py.File(run_file) as h5_file:
+                    #    labscript.save_labscripts(h5_file)
+                    # labscript.labscript_cleanup()
+                    # instead of the following code
+                    # 
                     success = labscript.compile(*data)
                 self.to_parent.put(['done',success])
             elif signal == 'quit':
