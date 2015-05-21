@@ -558,7 +558,7 @@ def make_single_run_file(filename, sequenceglobals, shot_globals, sequence_id, n
         set_shot_globals(h5file, shot_globals)
 
 
-def make_run_file_from_globals_files(labscript_file, globals_files, output_path, sequence_id_format):
+def make_run_file_from_globals_files(labscript_file, globals_files, output_path, sequence_id_format, notes):
     """Creates a run file output_path, using all the globals from
     globals_files. Uses labscript_file only to generate a sequence ID"""
     groups = get_all_groups(globals_files)
@@ -573,7 +573,7 @@ def make_run_file_from_globals_files(labscript_file, globals_files, output_path,
         raise ValueError('Cannot compile to a single run file: The following globals are a sequence: ' +
                          ' '.join(scanning_globals))
     sequence_id = generate_sequence_id(labscript_file, sequence_id_format)
-    make_single_run_file(output_path, sequence_globals, shots[0], sequence_id, 1, 1)
+    make_single_run_file(output_path, sequence_globals, shots[0], sequence_id, notes, 1, 1)
 
 
 def compile_labscript(labscript_file, run_file):
@@ -644,7 +644,7 @@ def compile_multishot_async(labscript_file, run_files, stream_port, done_callbac
     child.communicate()
 
 
-def compile_labscript_with_globals_files_async(labscript_file, globals_files, output_path, stream_port, done_callback):
+def compile_labscript_with_globals_files_async(labscript_file, globals_files, output_path, sequence_id_format, notes, stream_port, done_callback):
     """Same as compile_labscript_with_globals_files, except it launches
     a thread to do the work and does not return anything. Instead,
     stderr and stdout will be put to stream_port via zmq push in
@@ -652,7 +652,7 @@ def compile_labscript_with_globals_files_async(labscript_file, globals_files, ou
     compilation is finished, the function done_callback will be called
     a boolean argument indicating success or failure."""
     try:
-        make_run_file_from_globals_files(labscript_file, globals_files, output_path)
+        make_run_file_from_globals_files(labscript_file, globals_files, output_path, sequence_id_format, notes)
         thread = threading.Thread(
             target=compile_labscript_async, args=[labscript_file, output_path, stream_port, done_callback])
         thread.daemon = True

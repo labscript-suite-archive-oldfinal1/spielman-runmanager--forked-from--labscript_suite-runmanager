@@ -12,7 +12,6 @@
 #####################################################################
 
 import sys
-import traceback
 from zprocess import setup_connection_with_parent
 to_parent, from_parent, kill_lock = setup_connection_with_parent(lock = True)
 
