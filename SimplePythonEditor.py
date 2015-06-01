@@ -73,6 +73,11 @@ class SimplePythonEditor(QsciScintilla):
         self.setTabWidth(4)
         self.setIndentationsUseTabs(False)
 
+        #AutoIndentation
+        self.setAutoIndent(True)
+        self.setIndentationGuides(True)
+        self.setIndentationWidth(4)
+
         # Don't want to see the horizontal scrollbar at all
         # Use raw message to Scintilla here (all messages are documented
         # here: http://www.scintilla.org/ScintillaDoc.html)

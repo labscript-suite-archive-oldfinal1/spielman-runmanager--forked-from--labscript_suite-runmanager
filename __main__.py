@@ -1671,7 +1671,8 @@ class RunManager(object):
                 shuffle)
             self.ui.pushButton_abort.setEnabled(True)
             self.compile_queue.put([labscript_file, run_files, send_to_BLACS, BLACS_host, send_to_runviewer])
-            self.ui.spinBox_SequenceIndex.setValue(self.ui.spinBox_SequenceIndex.value() + 1)
+            if self.ui.increment_checkBox.isChecked():            
+                self.ui.spinBox_SequenceIndex.setValue(self.ui.spinBox_SequenceIndex.value() + 1)
         except Exception as e:
             self.output_box.output('%s\n\n' % str(e), red=True)
         logger.info('end engage')
