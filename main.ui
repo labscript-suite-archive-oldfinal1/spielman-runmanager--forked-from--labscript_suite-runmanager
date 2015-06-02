@@ -1075,9 +1075,6 @@ subprocess</string>
    <property name="text">
     <string>Load configuration</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+O</string>
-   </property>
   </action>
   <action name="actionSave_configuration_as">
    <property name="enabled">
@@ -1155,6 +1152,9 @@ subprocess</string>
    </property>
    <property name="text">
     <string>Open Labscript file</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
    </property>
   </action>
  </widget>
