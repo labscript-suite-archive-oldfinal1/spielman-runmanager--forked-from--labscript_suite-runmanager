@@ -1447,6 +1447,7 @@ class RunManager(object):
         self.output_popout_button.clicked.connect(self.on_output_popout_button_clicked)
 
         # The menu items:
+        self.ui.actionSave_current_Labscript_file.triggered.connect(self.on_save_labscript_file_clicked)
         self.ui.actionLoad_configuration.triggered.connect(self.on_load_configuration_triggered)
         self.ui.actionRevert_configuration.triggered.connect(self.on_revert_configuration_triggered)
         self.ui.actionSave_configuration.triggered.connect(self.on_save_configuration_triggered)
@@ -1586,7 +1587,7 @@ class RunManager(object):
             return
 
         # Current exited file contents
-        current_labscript =  self.ui.Qscintella_Text.text()
+        current_labscript =  self.ui.Qscintilla_Text.text()
 
         with open(current_labscript_file, 'w') as f:
             f.write(current_labscript)
@@ -1632,7 +1633,7 @@ class RunManager(object):
         self.ui.lineEdit_labscript_file.setToolTip(text)
         
         # Tell editor to edit this file
-        self.ui.Qscintella_Text.setText(open(text).read())
+        self.ui.Qscintilla_Text.setText(open(text).read())
 
     def on_shot_output_folder_text_changed(self, text):
         # Blank out the 'reset default output folder' button if the user is
