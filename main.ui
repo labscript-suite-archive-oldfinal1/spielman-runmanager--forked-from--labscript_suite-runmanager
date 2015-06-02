@@ -256,7 +256,7 @@ QToolButton:hover {
                     </property>
                     <property name="icon">
                      <iconset resource="../../Anaconda/Lib/site-packages/qtutils/icons/icons.qrc">
-                      <normaloff>:/qtutils/custom/python-document.png</normaloff>:/qtutils/custom/python-document.png</iconset>
+                      <normaloff>:/qtutils/fugue/folder-open-document-text.png</normaloff>:/qtutils/fugue/folder-open-document-text.png</iconset>
                     </property>
                    </widget>
                   </item>
@@ -1127,7 +1127,7 @@ subprocess</string>
      <normaloff>:/qtutils/fugue/document--pencil.png</normaloff>:/qtutils/fugue/document--pencil.png</iconset>
    </property>
    <property name="text">
-    <string>Save current Labscript file</string>
+    <string>Save Labscript file</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -1139,7 +1139,7 @@ subprocess</string>
      <normaloff>:/qtutils/fugue/document--plus.png</normaloff>:/qtutils/fugue/document--plus.png</iconset>
    </property>
    <property name="text">
-    <string>Save current Labscript file as...</string>
+    <string>Save Labscript file as...</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+S</string>
@@ -1148,7 +1148,7 @@ subprocess</string>
   <action name="actionOpen_Labscript_file">
    <property name="icon">
     <iconset resource="../../Anaconda/Lib/site-packages/qtutils/icons/icons.qrc">
-     <normaloff>:/qtutils/custom/python-document.png</normaloff>:/qtutils/custom/python-document.png</iconset>
+     <normaloff>:/qtutils/fugue/folder-open-document.png</normaloff>:/qtutils/fugue/folder-open-document.png</iconset>
    </property>
    <property name="text">
     <string>Open Labscript file</string>
