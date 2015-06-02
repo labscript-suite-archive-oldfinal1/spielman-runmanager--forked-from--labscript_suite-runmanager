@@ -1446,8 +1446,10 @@ class RunManager(object):
         # The button that pops the output box in and out:
         self.output_popout_button.clicked.connect(self.on_output_popout_button_clicked)
 
-        # The menu items:
+        # The menu items:actionOpen_Labscript_file
+        self.ui.actionOpen_Labscript_file.triggered.connect(self.on_select_labscript_file_clicked)
         self.ui.actionSave_current_Labscript_file.triggered.connect(self.on_save_labscript_file_clicked)
+        self.ui.actionSave_current_Labscript_file_as.triggered.connect(self.on_save_as_labscript_file_triggered)
         self.ui.actionLoad_configuration.triggered.connect(self.on_load_configuration_triggered)
         self.ui.actionRevert_configuration.triggered.connect(self.on_revert_configuration_triggered)
         self.ui.actionSave_configuration.triggered.connect(self.on_save_configuration_triggered)
@@ -1558,7 +1560,7 @@ class RunManager(object):
             self.output_box_window.show()
         self.output_box_is_popped_out = not self.output_box_is_popped_out
 
-    def on_select_labscript_file_clicked(self, checked):
+    def on_select_labscript_file_clicked(self, checked=True):
         labscript_file = QtGui.QFileDialog.getOpenFileName(self.ui,
                                                            'Select labscript file',
                                                            self.last_opened_labscript_folder,
@@ -1578,7 +1580,36 @@ class RunManager(object):
         # Tell the output folder thread that the output folder might need updating:
         self.output_folder_update_required.set()
 
-    def on_save_labscript_file_clicked(self, checked):
+    def on_save_as_labscript_file_triggered(self, checked):
+        labscript_file = QtGui.QFileDialog.getSaveFileName(self.ui,
+                                                           'Select labscript file',
+                                                           self.last_opened_labscript_folder,
+                                                           "Python files (*.py)")
+        if not labscript_file:
+            # User cancelled selection
+            return
+            
+        # Convert to standard platform specific path, otherwise Qt likes forward slashes:
+        current_labscript_file = os.path.abspath(labscript_file)
+
+        # Save the containing folder for use next time we open the dialog box:
+        self.last_opened_labscript_folder = os.path.dirname(labscript_file)
+
+        # Tell the output folder thread that the output folder might need updating:
+        self.output_folder_update_required.set()
+
+        # Current script contents
+        current_labscript =  self.ui.Qscintilla_Text.text()
+
+        # Write file
+        with open(current_labscript_file, 'w') as f:
+            f.write(current_labscript)
+
+        # Write the file to the lineEdit (this can trigger a reload)
+        self.ui.lineEdit_labscript_file.setText(labscript_file)
+
+        
+    def on_save_labscript_file_clicked(self, checked=True):
         # Get the current labscript file:
         current_labscript_file = self.ui.lineEdit_labscript_file.text()
         

@@ -1055,7 +1055,9 @@ subprocess</string>
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionOpen_Labscript_file"/>
     <addaction name="actionSave_current_Labscript_file"/>
+    <addaction name="actionSave_current_Labscript_file_as"/>
     <addaction name="separator"/>
     <addaction name="actionLoad_configuration"/>
     <addaction name="actionRevert_configuration"/>
@@ -1086,7 +1088,7 @@ subprocess</string>
      <normaloff>:/qtutils/fugue/disk--plus.png</normaloff>:/qtutils/fugue/disk--plus.png</iconset>
    </property>
    <property name="text">
-    <string>Save as...</string>
+    <string>Save configuration as...</string>
    </property>
   </action>
   <action name="actionQuit">
@@ -1125,13 +1127,34 @@ subprocess</string>
   <action name="actionSave_current_Labscript_file">
    <property name="icon">
     <iconset resource="../../Anaconda/Lib/site-packages/qtutils/icons/icons.qrc">
-     <normaloff>:/qtutils/fugue/disk.png</normaloff>:/qtutils/fugue/disk.png</iconset>
+     <normaloff>:/qtutils/fugue/document--pencil.png</normaloff>:/qtutils/fugue/document--pencil.png</iconset>
    </property>
    <property name="text">
     <string>Save current Labscript file</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionSave_current_Labscript_file_as">
+   <property name="icon">
+    <iconset resource="../../Anaconda/Lib/site-packages/qtutils/icons/icons.qrc">
+     <normaloff>:/qtutils/fugue/document--plus.png</normaloff>:/qtutils/fugue/document--plus.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save current Labscript file as...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionOpen_Labscript_file">
+   <property name="icon">
+    <iconset resource="../../Anaconda/Lib/site-packages/qtutils/icons/icons.qrc">
+     <normaloff>:/qtutils/custom/python-document.png</normaloff>:/qtutils/custom/python-document.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open Labscript file</string>
    </property>
   </action>
  </widget>
