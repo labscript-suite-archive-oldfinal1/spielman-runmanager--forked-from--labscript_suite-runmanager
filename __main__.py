@@ -64,7 +64,7 @@ from zmq import ZMQError
 from labscript_utils.labconfig import LabConfig, config_prefix
 from labscript_utils.setup_logging import setup_logging
 import labscript_utils.shared_drive as shared_drive
-from SimplePythonEditor import *
+from SimplePythonEditor import SimplePythonEditor
 import runmanager
 
 from qtutils import inmain, inmain_decorator, UiLoader, inthread, DisconnectContextManager
@@ -1447,9 +1447,9 @@ class RunManager(object):
         self.output_popout_button.clicked.connect(self.on_output_popout_button_clicked)
 
         # The menu items:actionOpen_Labscript_file
-        self.ui.actionOpen_Labscript_file.triggered.connect(self.on_select_labscript_file_clicked)
-        self.ui.actionSave_current_Labscript_file.triggered.connect(self.on_save_labscript_file_clicked)
-        self.ui.actionSave_current_Labscript_file_as.triggered.connect(self.on_save_as_labscript_file_triggered)
+        self.ui.actionOpen_Labscript_file.triggered.connect(self.ui.script_SimplePythonEditor.on_open)
+        self.ui.actionSave_current_Labscript_file.triggered.connect(self.ui.script_SimplePythonEditor.on_save)
+        self.ui.actionSave_current_Labscript_file_as.triggered.connect(self.ui.script_SimplePythonEditor.on_save_as)
         self.ui.actionLoad_configuration.triggered.connect(self.on_load_configuration_triggered)
         self.ui.actionRevert_configuration.triggered.connect(self.on_revert_configuration_triggered)
         self.ui.actionSave_configuration.triggered.connect(self.on_save_configuration_triggered)
@@ -1459,11 +1459,14 @@ class RunManager(object):
         # labscript file and folder selection stuff:
         self.ui.toolButton_select_labscript_file.clicked.connect(self.on_select_labscript_file_clicked)
         self.ui.toolButton_select_shot_output_folder.clicked.connect(self.on_select_shot_output_folder_clicked)
-        self.ui.toolButton_save_labscript_file.clicked.connect(self.on_save_labscript_file_clicked)
         self.ui.toolButton_reset_shot_output_folder.clicked.connect(self.on_reset_shot_output_folder_clicked)
         self.ui.lineEdit_labscript_file.textChanged.connect(self.on_labscript_file_text_changed)
         self.ui.lineEdit_shot_output_folder.textChanged.connect(self.on_shot_output_folder_text_changed)
 
+        # Signals two and from the imbeded python editor
+        self.ui.script_SimplePythonEditor.filenameTrigger.connect(self.on_filenameTrigger)
+        # Override tooltip for filenameTrigger
+        self.ui.script_SimplePythonEditor.sendFilename_toolButton.setToolTip('Set as current Labscript file...')
 
         # Control buttons; engage, abort, restart subprocess:
         self.ui.pushButton_engage.clicked.connect(self.on_engage_clicked)
@@ -1507,6 +1510,19 @@ class RunManager(object):
         if os.name == 'nt':
             self.ui.newWindow.connect(set_win_appusermodel)
             self.output_box_window.newWindow.connect(set_win_appusermodel)
+
+    def on_filenameTrigger(self, filename=''):
+
+        # Convert to standard platform specific path, otherwise Qt likes forward slashes:
+        filename = os.path.abspath(filename)
+        if not os.path.isfile(filename):
+            error_dialog("No such file %s." % filename)
+            return
+
+        # Write the file to the lineEdit:
+        self.ui.lineEdit_labscript_file.setText(filename)
+        # Tell the output folder thread that the output folder might need updating:
+        self.output_folder_update_required.set()
 
     def on_close_event(self):
         save_data = self.get_save_data()
@@ -1575,54 +1591,12 @@ class RunManager(object):
             return
         # Save the containing folder for use next time we open the dialog box:
         self.last_opened_labscript_folder = os.path.dirname(labscript_file)
+        
         # Write the file to the lineEdit:
         self.ui.lineEdit_labscript_file.setText(labscript_file)
         # Tell the output folder thread that the output folder might need updating:
         self.output_folder_update_required.set()
-
-    def on_save_as_labscript_file_triggered(self, checked):
-        labscript_file = QtGui.QFileDialog.getSaveFileName(self.ui,
-                                                           'Select labscript file',
-                                                           self.last_opened_labscript_folder,
-                                                           "Python files (*.py)")
-        if not labscript_file:
-            # User cancelled selection
-            return
-            
-        # Convert to standard platform specific path, otherwise Qt likes forward slashes:
-        current_labscript_file = os.path.abspath(labscript_file)
-
-        # Save the containing folder for use next time we open the dialog box:
-        self.last_opened_labscript_folder = os.path.dirname(labscript_file)
-
-        # Tell the output folder thread that the output folder might need updating:
-        self.output_folder_update_required.set()
-
-        # Current script contents
-        current_labscript =  self.ui.Qscintilla_Text.text()
-
-        # Write file
-        with open(current_labscript_file, 'w') as f:
-            f.write(current_labscript)
-
-        # Write the file to the lineEdit (this can trigger a reload)
-        self.ui.lineEdit_labscript_file.setText(labscript_file)
-
         
-    def on_save_labscript_file_clicked(self, checked=True):
-        # Get the current labscript file:
-        current_labscript_file = self.ui.lineEdit_labscript_file.text()
-        
-        # Ignore if no file selected
-        if not current_labscript_file:
-            return
-
-        # Current exited file contents
-        current_labscript =  self.ui.Qscintilla_Text.text()
-
-        with open(current_labscript_file, 'w') as f:
-            f.write(current_labscript)
-
     def on_select_shot_output_folder_clicked(self, checked):
         shot_output_folder = QtGui.QFileDialog.getExistingDirectory(self.ui,
                                                                     'Select shot output folder',
@@ -1653,18 +1627,12 @@ class RunManager(object):
         # within the next second):
         self.output_folder_update_required.set()
 
-    def on_labscript_file_text_changed(self, text):
-        # Blank out the 'save labscript file' button if no labscript file is
-        # selected
-        enabled = bool(text)
-        self.ui.toolButton_save_labscript_file.setEnabled(enabled)
+    def on_labscript_file_text_changed(self, filename):
+        enabled = bool(filename)
         # Blank out the 'select shot output folder' button if no labscript
         # file is selected:
         self.ui.toolButton_select_shot_output_folder.setEnabled(enabled)
-        self.ui.lineEdit_labscript_file.setToolTip(text)
-        
-        # Tell editor to edit this file
-        self.ui.Qscintilla_Text.setText(open(text).read())
+        self.ui.lineEdit_labscript_file.setToolTip(filename)
 
     def on_shot_output_folder_text_changed(self, text):
         # Blank out the 'reset default output folder' button if the user is
