@@ -29,10 +29,7 @@ class SimplePythonEditor(QtGui.QWidget):
         loader = UiLoader()
         loader.registerCustomWidget(SimplePythonEditorTextField)
         self._ui = loader.load('simplepythoneditor.ui', self)
-        
-        # Variables
-        self._unsearched = True
-        
+                
         # Connections
         self._ui.save_toolButton.clicked.connect(self.on_save)
         self._ui.sendFilename_toolButton.clicked.connect(self.on_filenameTrigger)
@@ -44,8 +41,6 @@ class SimplePythonEditor(QtGui.QWidget):
         self._ui.case_sensitive_checkBox.toggled.connect(self.restart_find_replace)
         self._ui.wrap_search_checkBox.toggled.connect(self.restart_find_replace)
         self._ui.whole_word_checkBox.toggled.connect(self.restart_find_replace)
-        
-        
         self._ui.do_search_pushButton.clicked.connect(self.on_find_replace)        
 
         self._ui.goto_line_done_toolButton.clicked.connect(self.toggle_goto_line)
@@ -68,12 +63,12 @@ class SimplePythonEditor(QtGui.QWidget):
     def _currentIndex(self):
         return self._ui.editor_tabWidget.currentIndex()
         
-    def createTab(self, tabText=''):
+    def createTab(self):
         """
         Creates a new tab with an editor in it
         """
         editor = SimplePythonEditorTextField(self._ui.editor_tabWidget)
-        index = self._ui.editor_tabWidget.addTab(editor, tabText)
+        index = self._ui.editor_tabWidget.addTab(editor, editor.name)
         self._ui.editor_tabWidget.setCurrentIndex(index)
     
     def closeTab(self, index):
@@ -134,9 +129,36 @@ class SimplePythonEditor(QtGui.QWidget):
         if self._currentEditor:
             self.filenameTrigger.emit(self._currentEditor.filename)
 
-    def on_open(self, checked=True):
+    def on_new(self):
+        self.createTab()        
+
+    def on_open_named(self, filename=''):
+                
+        # Check to see if filename exists
+        tabs = len(self._ui.editor_tabWidget)
+        for index in range(tabs):
+            widget = self._ui.editor_tabWidget.widget(index)
+            if widget.filename == filename:
+                self._ui.editor_tabWidget.setCurrentIndex(index)
+                return
+        
         self.createTab()
-        self._currentEditor.on_open(checked)
+        self._currentEditor.on_open_named(filename)        
+
+    def on_open(self, checked=True):
+        if self._currentEditor:
+            path = self._currentEditor.folder
+        else:
+            path = ''
+            
+        filename = QtGui.QFileDialog.getOpenFileName(self,
+                                                     'Select python file',
+                                                     path,
+                                                     "Python files (*.py)")
+        # Convert to standard platform specific path, otherwise Qt likes forward slashes:
+        filename = os.path.abspath(filename)
+ 
+        self.on_open_named(filename=filename)
 
     def on_save(self, checked=True):
         if self._currentEditor:
@@ -145,45 +167,6 @@ class SimplePythonEditor(QtGui.QWidget):
     def on_save_as(self, checked=True):
         if self._currentEditor:
             self._currentEditor.on_save_as(checked)
-
-    def restart_find_replace(self):
-        self._unsearched = True
-
-    def do_find_next(self):
-        text = self.find_text_lineEdit.text()
-        if self._currentEditor and text:
-            if self._unsearched:
-                found = self._currentEditor.findFirst(text, 
-                                          False,
-                                          self._ui.case_sensitive_checkBox.isChecked(),
-                                          self._ui.whole_word_checkBox.isChecked(), 
-                                          self._ui.wrap_search_checkBox.isChecked(),
-                                          forward=self._ui.search_forward_toolButton.isChecked(), 
-                                          line=-1,
-                                          index=-1,
-                                          show=True,
-                                          posix=False)
-                if found:
-                    self._unsearched = False
-            else:
-                found = self._currentEditor.findNext()
-                        
-            return found
-        return False
-
-    def on_find_replace(self):
-        text = self.find_text_lineEdit.text()
-        if self._currentEditor and text:
-            if self._ui.replace_checkBox.isChecked():
-                replace_text = self.replace_text_lineEdit.text()
-                while True:
-                    self._currentEditor.replace(replace_text)
-                    found = self.do_find_next()
-
-                    if not found or not self._ui.replace_all_checkBox.isChecked():
-                        break
-            else:
-                self.do_find_next()
 
     def toggle_find_replace(self, checked=True):
         if self._ui.find_replace_groupBox.isVisible():
@@ -202,6 +185,22 @@ class SimplePythonEditor(QtGui.QWidget):
         else:        
             self._ui.goto_line_groupBox.show()
 
+    def restart_find_replace(self):
+        if self._currentEditor:
+            self._currentEditor.restart_find_replace()
+
+    def on_find_replace(self):
+        if self._currentEditor:
+            text = self.find_text_lineEdit.text()
+            self._currentEditor.on_find_replace(text,
+                    replace_text=self._ui.replace_text_lineEdit.text(),
+                    replace=self._ui.replace_checkBox.isChecked(),
+                    replace_all=self._ui.replace_all_checkBox.isChecked(),
+                    case_sensitive=self._ui.case_sensitive_checkBox.isChecked(),
+                    whole_word=self._ui.whole_word_checkBox.isChecked(), 
+                    wrap_search=self._ui.wrap_search_checkBox.isChecked(),
+                    forward=self._ui.search_forward_toolButton.isChecked()
+                    )
 
 class SimplePythonEditorTextField(QsciScintilla):
 
@@ -212,10 +211,10 @@ class SimplePythonEditorTextField(QsciScintilla):
 
         # defaults
         self._filename = ''
-        self._name = ''
         self._folder = ''
         self._changed = False
         self._parent = parent
+        self._unsearched = True
 
         # Connect some actions
         self.textChanged.connect(self.on_textChanged)
@@ -321,6 +320,19 @@ class SimplePythonEditorTextField(QsciScintilla):
     #
 
     @property
+    def name(self):
+        
+        basename = os.path.basename(self.filename)
+        
+        if not basename:
+            basename = '<<new>>'
+            
+        if self._changed:
+            basename = basename + '*'
+        
+        return basename
+
+    @property
     def filename(self):
         return self._filename
     
@@ -340,6 +352,10 @@ class SimplePythonEditorTextField(QsciScintilla):
             
         self.fileWatcher.addPath(newname)
 
+    @property
+    def folder(self):
+        return self._folder
+
     def on_fileChanged(self, filename):
         """
         reload when disk file is changed
@@ -349,20 +365,18 @@ class SimplePythonEditorTextField(QsciScintilla):
     # 
     # Define behavior
     #
-    
+        
     def on_textChanged(self, changed=True):
  
+        # If the text is changed, reset the search
+        self._unsearched = True
         status_changed = changed != self._changed
 
         if status_changed:
 
             self._changed = changed
-            if changed:
-                self._name = os.path.basename(self.filename) + '*'
-            else:
-                self._name = os.path.basename(self.filename)
             
-            self.setParentTitle(self._name)
+            self.setParentTitle(self.name)
             
     def setText(self, text, *args, **kwargs):
         super(SimplePythonEditorTextField, self).setText(text, *args, **kwargs)
@@ -418,13 +432,8 @@ class SimplePythonEditorTextField(QsciScintilla):
         # save current file
         self.saveFile(current_filename)
 
-    def on_open(self, checked=True):
-        filename = QtGui.QFileDialog.getOpenFileName(self,
-                                                     'Select python file',
-                                                     self._folder,
-                                                     "Python files (*.py)")
+    def on_open_named(self, filename=''):
         if not filename:
-            # User cancelled selection
             return
             
         # Convert to standard platform specific path, otherwise Qt likes forward slashes:
@@ -432,3 +441,43 @@ class SimplePythonEditorTextField(QsciScintilla):
 
         # save current file
         self.openFile(current_filename)
+
+    def restart_find_replace(self):
+        self._unsearched = True
+
+    def do_find_next(self, text, case_sensitive=False, whole_word=False, wrap_search=False, forward=True):
+        if self._unsearched:
+            found = self.findFirst(text, 
+                                      False,
+                                      case_sensitive,
+                                      whole_word, 
+                                      wrap_search,
+                                      forward=forward, 
+                                      line=-1,
+                                      index=-1,
+                                      show=True,
+                                      posix=False)
+            if found:
+                self._unsearched = False
+        else:
+            found = self.findNext()
+                    
+        return found
+
+    def on_find_replace(self, text,
+                        replace_text='',
+                        replace=False, 
+                        replace_all=False, 
+                        **kwargs):
+        if text:
+            if replace:
+                while True:
+                    self.replace(replace_text)
+                    found = self.do_find_next()
+
+                    if not found or not replace_all:
+                        break
+            else:
+                self.do_find_next(text, **kwargs)
+
+    

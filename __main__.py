@@ -1162,8 +1162,12 @@ class GroupTab(object):
 class RunmanagerMainWindow(QtGui.QMainWindow):
     # A signal to show that the window is shown and painted.
     firstPaint = Signal()
+    
     # A signal for when the window manager has created a new window for this widget:
     newWindow = Signal(int)
+
+    # A signal for when the send to editor button is pressed
+    edit_labscript = Signal(str)
 
     def __init__(self, *args, **kwargs):
         QtGui.QMainWindow.__init__(self, *args, **kwargs)
@@ -1187,7 +1191,6 @@ class RunmanagerMainWindow(QtGui.QMainWindow):
             self._previously_painted = True
             self.firstPaint.emit()
         return result
-
 
 class PoppedOutOutputBoxWindow(QtGui.QDialog):
     # A signal for when the window manager has created a new window for this widget:
@@ -1447,6 +1450,8 @@ class RunManager(object):
         self.output_popout_button.clicked.connect(self.on_output_popout_button_clicked)
 
         # File menu items
+
+        self.ui.actionNew_Labscript_file.triggered.connect(self.ui.script_SimplePythonEditor.on_new)
         self.ui.actionOpen_Labscript_file.triggered.connect(self.ui.script_SimplePythonEditor.on_open)
         self.ui.actionSave_current_Labscript_file.triggered.connect(self.ui.script_SimplePythonEditor.on_save)
         self.ui.actionSave_current_Labscript_file_as.triggered.connect(self.ui.script_SimplePythonEditor.on_save_as)
@@ -1459,8 +1464,7 @@ class RunManager(object):
         # Edit menu items
         self.ui.actionFind_replace.triggered.connect(self.ui.script_SimplePythonEditor.toggle_find_replace)
         self.ui.actionFind_replace_next.triggered.connect(self.ui.script_SimplePythonEditor.on_find_replace)
-        
-        
+                
         self.ui.actionGoto_line.triggered.connect(self.ui.script_SimplePythonEditor.toggle_goto_line)
 
         # labscript file and folder selection stuff:
@@ -1469,6 +1473,8 @@ class RunManager(object):
         self.ui.toolButton_reset_shot_output_folder.clicked.connect(self.on_reset_shot_output_folder_clicked)
         self.ui.lineEdit_labscript_file.textChanged.connect(self.on_labscript_file_text_changed)
         self.ui.lineEdit_shot_output_folder.textChanged.connect(self.on_shot_output_folder_text_changed)
+        self.ui.edit_current_labscript_toolButton.clicked.connect(self.on_edit_current_labscript)
+        self.ui.edit_labscript.connect(self.ui.script_SimplePythonEditor.on_open_named)
 
         # Signals two and from the imbeded python editor
         self.ui.script_SimplePythonEditor.filenameTrigger.connect(self.on_filenameTrigger)
@@ -1517,6 +1523,9 @@ class RunManager(object):
         if os.name == 'nt':
             self.ui.newWindow.connect(set_win_appusermodel)
             self.output_box_window.newWindow.connect(set_win_appusermodel)
+
+    def on_edit_current_labscript(self, checked=True):
+        self.ui.edit_labscript.emit(self.ui.lineEdit_labscript_file.text())
 
     def on_filenameTrigger(self, filename=''):
 

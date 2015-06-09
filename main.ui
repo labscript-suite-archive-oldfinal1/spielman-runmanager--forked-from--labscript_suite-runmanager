@@ -529,96 +529,72 @@ QToolButton:hover:checked {
          </item>
          <item row="1" column="1">
           <layout class="QHBoxLayout" name="horizontalLayout_8">
+           <property name="spacing">
+            <number>0</number>
+           </property>
            <item>
-            <widget class="QFrame" name="frame">
+            <widget class="QLineEdit" name="lineEdit_shot_output_folder">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
-             <property name="sizeIncrement">
+             <property name="maximumSize">
               <size>
-               <width>0</width>
-               <height>0</height>
+               <width>16777215</width>
+               <height>20</height>
               </size>
              </property>
-             <property name="frameShape">
-              <enum>QFrame::StyledPanel</enum>
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The folder in which newly compiled shot files will be placed.&lt;/p&gt;&lt;p&gt;If the folder does not exist, it will be created at compile time.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
-             <layout class="QHBoxLayout" name="horizontalLayout">
-              <property name="spacing">
-               <number>0</number>
-              </property>
-              <property name="leftMargin">
-               <number>0</number>
-              </property>
-              <property name="topMargin">
-               <number>0</number>
-              </property>
-              <property name="rightMargin">
-               <number>0</number>
-              </property>
-              <property name="bottomMargin">
-               <number>0</number>
-              </property>
-              <item>
-               <widget class="QLineEdit" name="lineEdit_shot_output_folder">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>16777215</width>
-                  <height>20</height>
-                 </size>
-                </property>
-                <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The folder in which newly compiled shot files will be placed.&lt;/p&gt;&lt;p&gt;If the folder does not exist, it will be created at compile time.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true"/>
-                </property>
-                <property name="frame">
-                 <bool>false</bool>
-                </property>
-                <property name="readOnly">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="Line" name="line_2">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QToolButton" name="toolButton_select_shot_output_folder">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>20</width>
-                  <height>20</height>
-                 </size>
-                </property>
-                <property name="toolTip">
-                 <string>Select folder ...</string>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">QToolButton{
+             <property name="styleSheet">
+              <string notr="true"/>
+             </property>
+             <property name="frame">
+              <bool>false</bool>
+             </property>
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="Line" name="line_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QToolButton" name="toolButton_select_shot_output_folder">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="toolTip">
+              <string>Select folder ...</string>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QToolButton{
     border: none;
     background: white;
     padding: 2px;
@@ -633,17 +609,14 @@ QToolButton:hover {
      background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
                                        stop: 0 #dadbde, stop: 1 #f6f7fa);
  }</string>
-                </property>
-                <property name="text">
-                 <string>...</string>
-                </property>
-                <property name="icon">
-                 <iconset resource="../../Anaconda/Lib/site-packages/qtutils/icons/icons.qrc">
-                  <normaloff>:/qtutils/fugue/folder-horizontal-open.png</normaloff>:/qtutils/fugue/folder-horizontal-open.png</iconset>
-                </property>
-               </widget>
-              </item>
-             </layout>
+             </property>
+             <property name="text">
+              <string>...</string>
+             </property>
+             <property name="icon">
+              <iconset resource="../../Anaconda/Lib/site-packages/qtutils/icons/icons.qrc">
+               <normaloff>:/qtutils/fugue/folder-horizontal-open.png</normaloff>:/qtutils/fugue/folder-horizontal-open.png</iconset>
+             </property>
             </widget>
            </item>
            <item>
@@ -665,6 +638,23 @@ QToolButton:hover {
              </property>
              <property name="toolTip">
               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Reset to default output folder.&lt;/p&gt;&lt;p&gt;If the folder does not exist it will be created at compile-time.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QToolButton{
+    border: none;
+    background: white;
+    padding: 2px;
+}
+
+QToolButton:hover {
+     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                       stop: 0 #f6f7fa, stop: 1 #dadbde);
+ }
+
+ QToolButton:pressed {
+     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                       stop: 0 #dadbde, stop: 1 #f6f7fa);
+ }</string>
              </property>
              <property name="text">
               <string>...</string>
@@ -876,6 +866,49 @@ QToolButton:hover {
               </property>
              </widget>
             </item>
+            <item>
+             <widget class="QToolButton" name="edit_current_labscript_toolButton">
+              <property name="minimumSize">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>Edit labscript file</string>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QToolButton{
+    border: none;
+    background: white;
+    padding: 2px;
+}
+
+QToolButton:hover {
+     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                       stop: 0 #f6f7fa, stop: 1 #dadbde);
+ }
+
+ QToolButton:pressed {
+     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                       stop: 0 #dadbde, stop: 1 #f6f7fa);
+ }</string>
+              </property>
+              <property name="text">
+               <string>...</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../../Anaconda/Lib/site-packages/qtutils/icons/icons.qrc">
+                <normaloff>:/qtutils/custom/python-document.png</normaloff>:/qtutils/custom/python-document.png</iconset>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
          </item>
@@ -1071,6 +1104,7 @@ subprocess</string>
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionNew_Labscript_file"/>
     <addaction name="actionOpen_Labscript_file"/>
     <addaction name="actionSave_current_Labscript_file"/>
     <addaction name="actionSave_current_Labscript_file_as"/>
@@ -1161,7 +1195,7 @@ subprocess</string>
   <action name="actionSave_current_Labscript_file_as">
    <property name="icon">
     <iconset resource="../../Anaconda/Lib/site-packages/qtutils/icons/icons.qrc">
-     <normaloff>:/qtutils/fugue/document--plus.png</normaloff>:/qtutils/fugue/document--plus.png</iconset>
+     <normaloff>:/qtutils/fugue/document--arrow.png</normaloff>:/qtutils/fugue/document--arrow.png</iconset>
    </property>
    <property name="text">
     <string>Save Labscript file as...</string>
@@ -1206,6 +1240,18 @@ subprocess</string>
     <string>Ctrl+G</string>
    </property>
   </action>
+  <action name="actionNew_Labscript_file">
+   <property name="icon">
+    <iconset resource="../../Anaconda/Lib/site-packages/qtutils/icons/icons.qrc">
+     <normaloff>:/qtutils/fugue/document--plus.png</normaloff>:/qtutils/fugue/document--plus.png</iconset>
+   </property>
+   <property name="text">
+    <string>New Labscript file</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -1233,8 +1279,6 @@ subprocess</string>
  <tabstops>
   <tabstop>lineEdit_labscript_file</tabstop>
   <tabstop>toolButton_select_labscript_file</tabstop>
-  <tabstop>lineEdit_shot_output_folder</tabstop>
-  <tabstop>toolButton_select_shot_output_folder</tabstop>
   <tabstop>scrollArea</tabstop>
   <tabstop>toolButton_axis_to_top</tabstop>
   <tabstop>toolButton_axis_up</tabstop>
