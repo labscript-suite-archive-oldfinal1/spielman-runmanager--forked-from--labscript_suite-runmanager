@@ -5,14 +5,9 @@ Created on Thu May 14 16:26:29 2015
 @author: Ian Spielman
 """
  
-#-------------------------------------------------------------------------
-# qsci_simple_pythoneditor.pyw
-#
-# QScintilla sample with PyQt
-#
-# Eli Bendersky (eliben@gmail.com)
-# This code is in the public domain
-#-------------------------------------------------------------------------
+
+# todo: implement nice shutdown of tab widget that shutdown all the tabs
+# one-by-one
 
 import os 
 
@@ -48,6 +43,8 @@ class SimplePythonEditor(QtGui.QWidget):
         self._ui.search_forward_toolButton.toggled.connect(self.restart_find_replace)
         self._ui.case_sensitive_checkBox.toggled.connect(self.restart_find_replace)
         self._ui.wrap_search_checkBox.toggled.connect(self.restart_find_replace)
+        self._ui.whole_word_checkBox.toggled.connect(self.restart_find_replace)
+        
         
         self._ui.do_search_pushButton.clicked.connect(self.on_find_replace)        
 
@@ -159,7 +156,7 @@ class SimplePythonEditor(QtGui.QWidget):
                 found = self._currentEditor.findFirst(text, 
                                           False,
                                           self._ui.case_sensitive_checkBox.isChecked(),
-                                          False, 
+                                          self._ui.whole_word_checkBox.isChecked(), 
                                           self._ui.wrap_search_checkBox.isChecked(),
                                           forward=self._ui.search_forward_toolButton.isChecked(), 
                                           line=-1,
