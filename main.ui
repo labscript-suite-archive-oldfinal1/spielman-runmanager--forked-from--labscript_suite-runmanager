@@ -1081,7 +1081,16 @@ subprocess</string>
     <addaction name="actionSave_configuration_as"/>
     <addaction name="actionQuit"/>
    </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionFind_replace"/>
+    <addaction name="actionFind_replace_next"/>
+    <addaction name="actionGoto_line"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
   </widget>
   <action name="actionLoad_configuration">
    <property name="icon">
@@ -1171,6 +1180,30 @@ subprocess</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionFind_replace">
+   <property name="text">
+    <string>Find/replace</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionGoto_line">
+   <property name="text">
+    <string>Goto line</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
+   </property>
+  </action>
+  <action name="actionFind_replace_next">
+   <property name="text">
+    <string>Find/replace next...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
    </property>
   </action>
  </widget>

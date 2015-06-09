@@ -1446,7 +1446,7 @@ class RunManager(object):
         # The button that pops the output box in and out:
         self.output_popout_button.clicked.connect(self.on_output_popout_button_clicked)
 
-        # The menu items:actionOpen_Labscript_file
+        # File menu items
         self.ui.actionOpen_Labscript_file.triggered.connect(self.ui.script_SimplePythonEditor.on_open)
         self.ui.actionSave_current_Labscript_file.triggered.connect(self.ui.script_SimplePythonEditor.on_save)
         self.ui.actionSave_current_Labscript_file_as.triggered.connect(self.ui.script_SimplePythonEditor.on_save_as)
@@ -1455,6 +1455,13 @@ class RunManager(object):
         self.ui.actionSave_configuration.triggered.connect(self.on_save_configuration_triggered)
         self.ui.actionSave_configuration_as.triggered.connect(self.on_save_configuration_as_triggered)
         self.ui.actionQuit.triggered.connect(self.ui.close)
+
+        # Edit menu items
+        self.ui.actionFind_replace.triggered.connect(self.ui.script_SimplePythonEditor.toggle_find_replace)
+        self.ui.actionFind_replace_next.triggered.connect(self.ui.script_SimplePythonEditor.on_find_replace)
+        
+        
+        self.ui.actionGoto_line.triggered.connect(self.ui.script_SimplePythonEditor.toggle_goto_line)
 
         # labscript file and folder selection stuff:
         self.ui.toolButton_select_labscript_file.clicked.connect(self.on_select_labscript_file_clicked)

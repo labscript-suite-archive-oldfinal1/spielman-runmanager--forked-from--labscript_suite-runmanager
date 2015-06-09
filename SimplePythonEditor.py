@@ -13,14 +13,14 @@ Created on Thu May 14 16:26:29 2015
 # Eli Bendersky (eliben@gmail.com)
 # This code is in the public domain
 #-------------------------------------------------------------------------
-import sys
+
 import os 
 
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import pyqtSignal
 
 
-from PyQt4.Qsci import QsciScintilla, QsciLexerPython
+from PyQt4.Qsci import QsciScintilla, QsciLexerPython, QsciCommand
 from qtutils import UiLoader
 
 class SimplePythonEditor(QtGui.QWidget):
@@ -34,11 +34,27 @@ class SimplePythonEditor(QtGui.QWidget):
         loader = UiLoader()
         loader.registerCustomWidget(SimplePythonEditorTextField)
         self._ui = loader.load('simplepythoneditor.ui', self)
-                
+        
         # Connections
         self._ui.save_toolButton.clicked.connect(self.on_save)
         self._ui.sendFilename_toolButton.clicked.connect(self.on_filenameTrigger)
         self._ui.editor_tabWidget.tabCloseRequested.connect(self.closeTab)
+
+        # restart the find-replace when anything is changed
+        self._ui.find_text_lineEdit.textChanged.connect(self.start_find_replace)
+        self._ui.search_forward_toolButton.toggled.connect(self.start_find_replace)
+        self._ui.case_sensitive_checkBox.toggled.connect(self.start_find_replace)
+        self._ui.wrap_search_checkBox.toggled.connect(self.start_find_replace)
+        
+        self._ui.do_search_pushButton.clicked.connect(self.on_find_replace)        
+
+        self._ui.goto_line_done_toolButton.clicked.connect(self.toggle_goto_line)
+        self._ui.goto_line_spinBox.editingFinished.connect(self.on_goto_line)
+        
+        # Hide optoinal functions
+        self._ui.goto_line_groupBox.hide()
+        self._ui.find_replace_groupBox.hide()
+
 
     #        
     # Functionality special to this object
@@ -90,21 +106,11 @@ class SimplePythonEditor(QtGui.QWidget):
         # Inform child to shutdown need to be widget at index
         if widget:
             widget.close()
-            widget.deleteLater()
-    
-    # TODO need close tab functionality
-    
+            widget.deleteLater()    
     
     #
     # Functionality passed on from editor children
     #
-
-    def on_filenameTrigger(self, checked=True):
-        """
-        When this is called emit a signal containg the current filename
-        """
-        if self._currentEditor:
-            self.filenameTrigger.emit(self._currentEditor.filename)
 
     def setText(self, text, *args, **kwargs):   
         """
@@ -121,6 +127,13 @@ class SimplePythonEditor(QtGui.QWidget):
         if self._currentEditor:
             return self._currentEditor.text()
 
+    def on_filenameTrigger(self, checked=True):
+        """
+        When this is called emit a signal containg the current filename
+        """
+        if self._currentEditor:
+            self.filenameTrigger.emit(self._currentEditor.filename)
+
     def on_open(self, checked=True):
         self.createTab()
         self._currentEditor.on_open(checked)
@@ -133,8 +146,51 @@ class SimplePythonEditor(QtGui.QWidget):
         if self._currentEditor:
             self._currentEditor.on_save_as(checked)
 
+    def start_find_replace(self):
+        text = self.find_text_lineEdit.text()
+        if self._currentEditor and text:
+            self._currentEditor.findFirst(text, 
+                                          False,
+                                          self._ui.case_sensitive_checkBox.isChecked(),
+                                          False, 
+                                          self._ui.wrap_search_checkBox.isChecked(),
+                                          forward=self._ui.search_forward_toolButton.isChecked(), 
+                                          line=-1,
+                                          index=-1,
+                                          show=True,
+                                          posix=False)
 
-            
+    def on_find_replace(self):
+        text = self.find_text_lineEdit.text()
+        if self._currentEditor and text:
+            if self._ui.replace_checkBox.isChecked():
+                replace_text = self.replace_text_lineEdit.text()
+                while True:
+                    self._currentEditor.replace(replace_text)
+                    found = self._currentEditor.findNext()
+                    if not found or not  self._ui.replace_all_checkBox.isChecked():
+                        break
+            else:
+                self._currentEditor.findNext()
+                
+
+
+    def toggle_find_replace(self, checked=True):
+        if self._ui.find_replace_groupBox.isVisible():
+            self._ui.find_replace_groupBox.hide()
+        else:        
+            self._ui.find_replace_groupBox.show()
+
+    def on_goto_line(self):
+        if self._currentEditor:
+            line = self.goto_line_spinBox.value()-1 # zero indexed
+            self._currentEditor.setCursorPosition(line, 0)
+    
+    def toggle_goto_line(self, checked=True):
+        if self._ui.goto_line_groupBox.isVisible():
+            self._ui.goto_line_groupBox.hide()
+        else:        
+            self._ui.goto_line_groupBox.show()
 
 
 class SimplePythonEditorTextField(QsciScintilla):
@@ -199,6 +255,14 @@ class SimplePythonEditorTextField(QsciScintilla):
                                     # not at the start of the next object
         self.setLexer(lexer)
         self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, 1, 'Courier')
+
+        # unset control charaters I need access to
+
+        commands = self.standardCommands()
+
+        # free ctrl-L to goto line        
+        command = commands.find(QsciCommand.LineCut)
+        command.setKey(0)
 
         # Set python tabs
         self.setTabIndents(True)
