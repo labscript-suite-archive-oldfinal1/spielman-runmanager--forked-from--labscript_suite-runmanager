@@ -35,16 +35,19 @@ class SimplePythonEditor(QtGui.QWidget):
         loader.registerCustomWidget(SimplePythonEditorTextField)
         self._ui = loader.load('simplepythoneditor.ui', self)
         
+        # Variables
+        self._unsearched = True
+        
         # Connections
         self._ui.save_toolButton.clicked.connect(self.on_save)
         self._ui.sendFilename_toolButton.clicked.connect(self.on_filenameTrigger)
         self._ui.editor_tabWidget.tabCloseRequested.connect(self.closeTab)
 
         # restart the find-replace when anything is changed
-        self._ui.find_text_lineEdit.textChanged.connect(self.start_find_replace)
-        self._ui.search_forward_toolButton.toggled.connect(self.start_find_replace)
-        self._ui.case_sensitive_checkBox.toggled.connect(self.start_find_replace)
-        self._ui.wrap_search_checkBox.toggled.connect(self.start_find_replace)
+        self._ui.find_text_lineEdit.textChanged.connect(self.restart_find_replace)
+        self._ui.search_forward_toolButton.toggled.connect(self.restart_find_replace)
+        self._ui.case_sensitive_checkBox.toggled.connect(self.restart_find_replace)
+        self._ui.wrap_search_checkBox.toggled.connect(self.restart_find_replace)
         
         self._ui.do_search_pushButton.clicked.connect(self.on_find_replace)        
 
@@ -146,10 +149,14 @@ class SimplePythonEditor(QtGui.QWidget):
         if self._currentEditor:
             self._currentEditor.on_save_as(checked)
 
-    def start_find_replace(self):
+    def restart_find_replace(self):
+        self._unsearched = True
+
+    def do_find_next(self):
         text = self.find_text_lineEdit.text()
         if self._currentEditor and text:
-            self._currentEditor.findFirst(text, 
+            if self._unsearched:
+                found = self._currentEditor.findFirst(text, 
                                           False,
                                           self._ui.case_sensitive_checkBox.isChecked(),
                                           False, 
@@ -159,6 +166,13 @@ class SimplePythonEditor(QtGui.QWidget):
                                           index=-1,
                                           show=True,
                                           posix=False)
+                if found:
+                    self._unsearched = False
+            else:
+                found = self._currentEditor.findNext()
+                        
+            return found
+        return False
 
     def on_find_replace(self):
         text = self.find_text_lineEdit.text()
@@ -167,13 +181,12 @@ class SimplePythonEditor(QtGui.QWidget):
                 replace_text = self.replace_text_lineEdit.text()
                 while True:
                     self._currentEditor.replace(replace_text)
-                    found = self._currentEditor.findNext()
-                    if not found or not  self._ui.replace_all_checkBox.isChecked():
+                    found = self.do_find_next()
+
+                    if not found or not self._ui.replace_all_checkBox.isChecked():
                         break
             else:
-                self._currentEditor.findNext()
-                
-
+                self.do_find_next()
 
     def toggle_find_replace(self, checked=True):
         if self._ui.find_replace_groupBox.isVisible():
