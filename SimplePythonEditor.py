@@ -36,7 +36,7 @@ class SimplePythonEditor(QtGui.QWidget):
         self._ui.editor_tabWidget.tabCloseRequested.connect(self.closeTab)
 
         # restart the find-replace when anything is changed
-        self._ui.find_text_lineEdit.textChanged.connect(self.restart_find_replace)
+        self._ui.find_text_lineEdit.textChanged.connect(self.restart_find_replace_and_search)
         self._ui.search_forward_toolButton.toggled.connect(self.restart_find_replace)
         self._ui.case_sensitive_checkBox.toggled.connect(self.restart_find_replace)
         self._ui.wrap_search_checkBox.toggled.connect(self.restart_find_replace)
@@ -73,7 +73,7 @@ class SimplePythonEditor(QtGui.QWidget):
     
     def closeTab(self, index):
         """
-        closedown the current tab
+        closedown the tab with index
         """
         widget = self._ui.editor_tabWidget.widget(index)
 
@@ -93,8 +93,6 @@ class SimplePythonEditor(QtGui.QWidget):
             
             if reply == QtGui.QMessageBox.Save:
                 widget.on_save(True)
-
-
 
         self._ui.editor_tabWidget.removeTab(index)
         
@@ -188,6 +186,13 @@ class SimplePythonEditor(QtGui.QWidget):
     def restart_find_replace(self):
         if self._currentEditor:
             self._currentEditor.restart_find_replace()
+
+    def restart_find_replace_and_search(self):
+        """
+        Do a new search
+        """
+        self.restart_find_replace()
+        self.on_find_replace()
 
     def on_find_replace(self):
         if self._currentEditor:
@@ -446,6 +451,12 @@ class SimplePythonEditorTextField(QsciScintilla):
         self._unsearched = True
 
     def do_find_next(self, text, case_sensitive=False, whole_word=False, wrap_search=False, forward=True):
+
+        if self._unsearched or not forward:
+            line_from, index_from, _line_to, _index_to = self.getSelection()
+            self.setCursorPosition(line_from, max([0, index_from-1]))
+
+
         if self._unsearched:
             found = self.findFirst(text, 
                                       False,
