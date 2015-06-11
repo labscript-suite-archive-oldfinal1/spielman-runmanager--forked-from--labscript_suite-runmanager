@@ -496,6 +496,17 @@ def expand_globals(sequence_globals, evaled_globals):
         shots.append(shot_globals)
     return shots
 
+def generate_output_folder(current_labscript_file, 
+                           experiment_shot_storage, 
+                           current_day_folder_suffix,
+                           current_sequence_index):
+    current_labscript_basename = os.path.splitext(os.path.basename(current_labscript_file))[0]
+    default_output_folder = os.path.join(experiment_shot_storage,
+                                         current_labscript_basename, 
+                                         current_day_folder_suffix,
+                                         "%04d"%current_sequence_index)
+    default_output_folder = os.path.normpath(default_output_folder)
+    return default_output_folder
 
 def generate_sequence_id(scriptname, sequence_id_format):
     """Our convention for generating sequence ids. Just a timestamp and
@@ -505,7 +516,7 @@ def generate_sequence_id(scriptname, sequence_id_format):
     scriptbase = os.path.basename(scriptname).split('.py')[0]
     return timestamp + '_' + scriptbase
 
-def make_run_files(output_folder, sequence_globals, shots, sequence_id, notes, shuffle=False):
+def make_run_files(output_folder, sequence_globals, shots, sequence_id, sequence_index, notes, shuffle=False):
     """Does what it says. sequence_globals and shots are of the datatypes
     returned by get_globals and get_shots, one is a nested dictionary with
     string values, and the other a flat dictionary. sequence_id should
@@ -526,10 +537,10 @@ def make_run_files(output_folder, sequence_globals, shots, sequence_id, notes, s
         random.shuffle(shots)
     for i, shot_globals in enumerate(shots):
         runfilename = ('%s_%0' + str(ndigits) + 'd.h5') % (basename, i)
-        make_single_run_file(runfilename, sequence_globals, shot_globals, sequence_id, notes, i, nruns)
+        make_single_run_file(runfilename, sequence_globals, shot_globals, sequence_id, sequence_index, notes, i, nruns)
         yield runfilename
 
-def make_single_run_file(filename, sequenceglobals, shot_globals, sequence_id, notes, run_no, n_runs):
+def make_single_run_file(filename, sequenceglobals, shot_globals, sequence_id, sequence_index, notes, run_no, n_runs):
     """Does what it says. shot_globals is a dict of this run's globals,
     the format being the same as that of one element of the list returned
     by expand_globals.  sequence_globals is a nested dictionary of the
@@ -542,6 +553,7 @@ def make_single_run_file(filename, sequenceglobals, shot_globals, sequence_id, n
     this sequence_id."""
     with h5py.File(filename, 'w') as h5file:
         h5file.attrs['sequence_id'] = sequence_id
+        h5file.attrs['sequence_index'] = sequence_index
         h5file.attrs['run number'] = run_no
         h5file.attrs['n_runs'] = n_runs
         h5file.attrs['notes'] = notes
@@ -573,7 +585,7 @@ def make_run_file_from_globals_files(labscript_file, globals_files, output_path,
         raise ValueError('Cannot compile to a single run file: The following globals are a sequence: ' +
                          ' '.join(scanning_globals))
     sequence_id = generate_sequence_id(labscript_file, sequence_id_format)
-    make_single_run_file(output_path, sequence_globals, shots[0], sequence_id, notes, 1, 1)
+    make_single_run_file(output_path, sequence_globals, shots[0], sequence_id, 0, notes, 1, 1)
 
 
 def compile_labscript(labscript_file, run_file):

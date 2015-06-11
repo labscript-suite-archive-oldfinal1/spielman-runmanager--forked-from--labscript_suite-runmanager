@@ -2230,12 +2230,10 @@ class RunManager(object):
         
         if not current_labscript_file:
             return ''
-        current_labscript_basename = os.path.splitext(os.path.basename(current_labscript_file))[0]
-        default_output_folder = os.path.join(self.experiment_shot_storage,
-                                             current_labscript_basename, 
-                                             current_day_folder_suffix,
-                                             "%04d"%current_sequence_index)
-        default_output_folder = os.path.normpath(default_output_folder)
+        default_output_folder = runmanager.generate_output_folder(current_labscript_file, 
+                                                                  self.experiment_shot_storage, 
+                                                                  current_day_folder_suffix,
+                                                                  current_sequence_index)
         return default_output_folder
 
     def rollover_shot_output_folder(self):
@@ -3039,7 +3037,8 @@ class RunManager(object):
             f.write(notes)
         
         sequence_id = runmanager.generate_sequence_id(labscript_file, self.sequence_id_format)
-        run_files = runmanager.make_run_files(output_folder, sequence_globals, shots, sequence_id, notes, shuffle)
+        sequence_index = self.ui.spinBox_SequenceIndex.value()
+        run_files = runmanager.make_run_files(output_folder, sequence_globals, shots, sequence_id, sequence_index, notes, shuffle)
         logger.debug(run_files)
         return labscript_file, run_files
 
