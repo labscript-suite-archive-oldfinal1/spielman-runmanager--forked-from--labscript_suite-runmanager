@@ -365,7 +365,9 @@ class SimplePythonEditorTextField(QsciScintilla):
         """
         reload when disk file is changed
         """
+        x, y = self.getCursorPosition()
         self.openFile(filename)
+        self.setCursorPosition(x,y)
 
     # 
     # Define behavior
@@ -405,8 +407,10 @@ class SimplePythonEditorTextField(QsciScintilla):
     def saveFile(self, filename):
 
         # Write file
+        self.fileWatcher.blockSignals(True)
         with open(filename, 'w') as f:
             f.write(self.text())
+        self.fileWatcher.blockSignals(False)
 
         self._folder = os.path.dirname(filename)
         self.filename = filename
