@@ -72,6 +72,13 @@
     </layout>
    </item>
    <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QTabWidget" name="editor_tabWidget">
      <property name="tabShape">
       <enum>QTabWidget::Rounded</enum>
