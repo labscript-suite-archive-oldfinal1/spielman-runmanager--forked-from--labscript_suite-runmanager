@@ -499,13 +499,13 @@ def expand_globals(sequence_globals, evaled_globals):
         shots.append(shot_globals)
     return shots
 
-def generate_output_folder(current_labscript_file, 
-                           experiment_shot_storage, 
+def generate_output_folder(current_labscript_file,
+                           experiment_shot_storage,
                            current_day_folder_suffix,
                            current_sequence_index):
     current_labscript_basename = os.path.splitext(os.path.basename(current_labscript_file))[0]
     default_output_folder = os.path.join(experiment_shot_storage,
-                                         current_labscript_basename, 
+                                         current_labscript_basename,
                                          current_day_folder_suffix,
                                          "%04d"%current_sequence_index)
     default_output_folder = os.path.normpath(default_output_folder)
@@ -514,7 +514,7 @@ def generate_output_folder(current_labscript_file,
 def generate_sequence_id(scriptname, sequence_id_format):
     """Our convention for generating sequence ids. Just a timestamp and
     the name of the labscript that the run file is to be compiled with."""
-    
+
     timestamp = time.strftime(sequence_id_format, time.localtime())
     scriptbase = os.path.basename(scriptname).split('.py')[0]
     return timestamp + '_' + scriptbase
@@ -594,10 +594,10 @@ def make_run_file_from_globals_files(labscript_file, globals_files, output_path,
 def compile_labscript(labscript_file, run_file):
     """Compiles labscript_file with the run file, returning
     the processes return code, stdout and stderr."""
-    proc = subprocess.Popen([sys.executable, labscript_file, run_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    compiler_path = os.path.join(os.path.dirname(__file__), 'singleshot_compiler.py')
+    proc = subprocess.Popen([sys.executable, compiler_path, labscript_file, run_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = proc.communicate()
     return proc.returncode, stdout, stderr
-
 
 def compile_labscript_with_globals_files(labscript_file, globals_files, output_path):
     """Creates a run file output_path, using all the globals from
@@ -678,6 +678,21 @@ def compile_labscript_with_globals_files_async(labscript_file, globals_files, ou
         t = threading.Thread(target=done_callback, args=(False,))
         t.daemon = True
         t.start()
+
+def submit_to_blacs(shot_file, host='localhost', timeout=5):
+    """Submit a shot file to BLACS running on the given hostname.
+    Uses port number as saved in labconfig. Returns BLACS's reponse
+    or raises an exception if shot was not added successfully."""
+    from labscript_utils.labconfig import LabConfig
+    import zprocess
+    from labscript_utils.shared_drive import path_to_agnostic
+    config = LabConfig()
+    port = int(config.get('ports', 'blacs'))
+    data = path_to_agnostic(shot_file)
+    response = zprocess.zmq_get(port, host, data, timeout=timeout)
+    if 'added successfully' not in response:
+        raise Exception(response)
+    return response
 
 
 def get_shot_globals(filepath):
