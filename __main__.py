@@ -1643,6 +1643,29 @@ class RunManager(object):
         self.ui.lineEdit_labscript_file.setText(labscript_file)
         # Tell the output folder thread that the output folder might need updating:
         self.output_folder_update_required.set()
+
+    def on_edit_labscript_file_clicked(self, checked):
+        # get path to text editor
+        editor_path = self.exp_config.get('programs', 'text_editor')
+        editor_args = self.exp_config.get('programs', 'text_editor_arguments')
+        # Get the current labscript file:
+        current_labscript_file = self.ui.lineEdit_labscript_file.text()
+        # Ignore if no file selected
+        if not current_labscript_file:
+            return
+        if not editor_path:
+            error_dialog("No editor specified in the labconfig.")
+        if '{file}' in editor_args:
+            # Split the args on spaces into a list, replacing {file} with the labscript file
+            editor_args = [arg if arg != '{file}' else current_labscript_file for arg in editor_args.split()]
+        else:
+            # Otherwise if {file} isn't already in there, append it to the other args:
+            editor_args = [current_labscript_file] + editor_args.split()
+        try:
+            subprocess.Popen([editor_path] + editor_args)
+        except Exception as e:
+            error_dialog("Unable to launch text editor specified in %s. Error was: %s" %
+                         (self.exp_config.config_path, str(e)))
         
     def on_select_shot_output_folder_clicked(self, checked):
         shot_output_folder = QtGui.QFileDialog.getExistingDirectory(self.ui,
