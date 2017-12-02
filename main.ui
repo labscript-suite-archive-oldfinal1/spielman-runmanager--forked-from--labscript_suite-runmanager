@@ -794,7 +794,7 @@ QToolButton:hover {
               </widget>
              </item>
              <item>
-              <widget class="QToolButton" name="edit_current_labscript_toolButton">
+              <widget class="QToolButton" name="toolButton_edit_current_labscript">
                <property name="minimumSize">
                 <size>
                  <width>20</width>

@@ -1500,11 +1500,11 @@ class RunManager(object):
 
         # labscript file and folder selection stuff:
         self.ui.toolButton_select_labscript_file.clicked.connect(self.on_select_labscript_file_clicked)
+        self.ui.toolButton_edit_current_labscript.clicked.connect(self.on_edit_labscript_file_clicked)
         self.ui.toolButton_select_shot_output_folder.clicked.connect(self.on_select_shot_output_folder_clicked)
         self.ui.toolButton_reset_shot_output_folder.clicked.connect(self.on_reset_shot_output_folder_clicked)
         self.ui.lineEdit_labscript_file.textChanged.connect(self.on_labscript_file_text_changed)
         self.ui.lineEdit_shot_output_folder.textChanged.connect(self.on_shot_output_folder_text_changed)
-        self.ui.edit_current_labscript_toolButton.clicked.connect(self.on_edit_current_labscript)
         self.ui.edit_labscript.connect(self.ui.script_SimplePythonEditor.on_open_named)
 
         # Signals two and from the imbeded python editor
@@ -1554,9 +1554,6 @@ class RunManager(object):
         if os.name == 'nt':
             self.ui.newWindow.connect(set_win_appusermodel)
             self.output_box_window.newWindow.connect(set_win_appusermodel)
-
-    def on_edit_current_labscript(self, checked=True):
-        self.ui.edit_labscript.emit(self.ui.lineEdit_labscript_file.text())
 
     def on_filenameTrigger(self, filename=''):
 
@@ -1645,27 +1642,34 @@ class RunManager(object):
         self.output_folder_update_required.set()
 
     def on_edit_labscript_file_clicked(self, checked):
-        # get path to text editor
-        editor_path = self.exp_config.get('programs', 'text_editor')
-        editor_args = self.exp_config.get('programs', 'text_editor_arguments')
-        # Get the current labscript file:
-        current_labscript_file = self.ui.lineEdit_labscript_file.text()
-        # Ignore if no file selected
-        if not current_labscript_file:
-            return
-        if not editor_path:
-            error_dialog("No editor specified in the labconfig.")
-        if '{file}' in editor_args:
-            # Split the args on spaces into a list, replacing {file} with the labscript file
-            editor_args = [arg if arg != '{file}' else current_labscript_file for arg in editor_args.split()]
-        else:
-            # Otherwise if {file} isn't already in there, append it to the other args:
-            editor_args = [current_labscript_file] + editor_args.split()
         try:
-            subprocess.Popen([editor_path] + editor_args)
-        except Exception as e:
-            error_dialog("Unable to launch text editor specified in %s. Error was: %s" %
-                         (self.exp_config.config_path, str(e)))
+            use_external_editor = self.exp_config.getboolean('runmanager', 'use_external_editor')
+        except LabConfig.NoOptionError, LabConfig.NoSectionError:
+            use_external_editor = True
+        if use_external_editor:
+            # get path to text editor
+            editor_path = self.exp_config.get('programs', 'text_editor')
+            editor_args = self.exp_config.get('programs', 'text_editor_arguments')
+            # Get the current labscript file:
+            current_labscript_file = self.ui.lineEdit_labscript_file.text()
+            # Ignore if no file selected
+            if not current_labscript_file:
+                return
+            if not editor_path:
+                error_dialog("No editor specified in the labconfig.")
+            if '{file}' in editor_args:
+                # Split the args on spaces into a list, replacing {file} with the labscript file
+                editor_args = [arg if arg != '{file}' else current_labscript_file for arg in editor_args.split()]
+            else:
+                # Otherwise if {file} isn't already in there, append it to the other args:
+                editor_args = [current_labscript_file] + editor_args.split()
+            try:
+                subprocess.Popen([editor_path] + editor_args)
+            except Exception as e:
+                error_dialog("Unable to launch text editor specified in %s. Error was: %s" %
+                             (self.exp_config.config_path, str(e)))
+        else:
+            self.ui.edit_labscript.emit(self.ui.lineEdit_labscript_file.text())
         
     def on_select_shot_output_folder_clicked(self, checked):
         shot_output_folder = QtGui.QFileDialog.getExistingDirectory(self.ui,
